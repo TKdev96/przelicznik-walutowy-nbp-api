@@ -2,16 +2,16 @@ from tkinter import *
 import tkinter as tk
 import requests
 import json
-
+from tkcalendar import DateEntry 
+from csv import writer
 
 frame = tk.Tk()
 frame.title("Przelicznik walut")
 frame.geometry('400x400')
 
 def printInput():
-   inpA = a1.get(1.0, "end-1c")
-   lbl1.config(text = "Data (RRRR-MM-DD): "+inpA)
-   
+   inpA = a1.get_date()
+   lbl1.config(text = "Data (RRRR-MM-DD): "+str(inpA))
    inpB = b1.get(1.0, "end-1c")
    lbl2.config(text = "Kod waluty (eur / usd / gbp): "+inpB)
 
@@ -20,36 +20,30 @@ def printInput():
 
    inpCToInt = int(inpC)
 
-
-   print(type(inpA), type(inpB), type(inpC))
-
    url = f"http://api.nbp.pl/api/exchangerates/rates/a/{inpB}/{inpA}/"
-   print(url)
    r = requests.get(url)
-   print(type(r))
    res = r.json()
-   print(type(res))
    
-
    for i in res['rates']:
       items = i
-      print(i)
+      
 
    wynikWaluta = res['code']
    wynikKurs = (items['mid'])
-   print(wynikWaluta, wynikKurs)
-   print(type(wynikKurs))
 
-   wynik = float(inpCToInt * wynikKurs)
+   wynik = int(inpCToInt * wynikKurs)
    lbl4.config(text = f"Wartość faktury po przeliczeniu: {wynik} ")
 
+   dane = [inpA, wynikWaluta, wynikKurs, wynik] 
+   with open('wprowadzone_faktury.csv', 'a') as f:
+      writer_object = writer(f)
+      writer_object.writerow(dane)
+      f.close()
 
 
-
-
-data = Label(text="Data (RRRR-MM-DD): ") 
+data = Label(text="Data: ") 
 data.pack()
-a1 = tk.Text(frame, height=2, width=10)
+a1 = DateEntry(frame, selectmode='day')
 a1.pack()
 
 waluta = Label(text="Kod waluty (eur / usd / gbp): ")
